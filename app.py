@@ -41,8 +41,8 @@ def count(date_prefix=None):
     #TODO
     count = 0
     if (date_prefix in dict) :
-        for url, c in dict[date_prefix] :
-            count += c
+        for url in dict[date_prefix]:
+            count += dict[date_prefix][url]
             
         #count = len(dict[date_prefix])    
     return jsonify({"count": count})
