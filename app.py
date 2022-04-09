@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
 
@@ -53,7 +53,7 @@ def popular(date_prefix=None):
     size = request.args.get('size', type=int, default=3)
     #TODO
     if (not date_prefix in dict) :
-        return 'error date is not stored'
+        return Response('error date is not stored', status=400)
     json = {"queries": []}
     queries = dict[date_prefix]
     keys = list(queries.keys())
