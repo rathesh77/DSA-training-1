@@ -4,7 +4,7 @@
 from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
-
+import re
 # Setting up Flask app
 app = Flask(__name__)
 dict = {}
@@ -52,33 +52,67 @@ def count(date_prefix=None):
 def popular(date_prefix=None):
     size = request.args.get('size', type=int, default=3)
     #TODO
-    if (not date_prefix in dict) :
-        return Response('error date is not stored', status=400)
-    json = {"queries": []}
-    queries = dict[date_prefix]
-    keys = list(queries.keys())
-    end = size
-    if end > len(keys):
-        end = len(keys)
-    for i in range(0, end): 
-        for j in range (i+1, len(keys)): 
-            if queries[keys[i]] < queries[keys[j]]: 
-                temp = keys[i]
-                keys[i] = keys[j]
-                keys[j] = temp
-    ans = list()
-    for i in range(0, end):
-        ans.append({'url': keys[i], 'count': queries[keys[i]]})
+    parsedDate = None
+    if (parsedDate := validate(date_prefix, '%Y-%m-%d')) == False:
+        if (parsedDate := validate(date_prefix, '%Y-%m')) == False:
+            if (parsedDate := validate(date_prefix, '%Y') )== False: 
+                if (parsedDate := validate(date_prefix, '%Y-%m-%d %H:%M:%S')) == False:
+                    return Response('invalid date format', status=400)
 
-    json["queries"].append({"query": ans, "count": 1})
+    #if (not date_prefix in dict) :
+    #    return Response('error date is not stored', status=400)
+    keys = list()
+    seen = {}
+    for date in dict:
+        if re.search("^"+parsedDate, date) != None and not date in seen:
+            keys.append(date)
+            seen[date] = True
+            
+    if len(keys) == 0:
+        return Response('error date is not stored', status=400)
+
+    json = {"queries": []}
+    ans = list()
+
+    print(keys)
+    quit = False
+    count = 0
+    for date in keys:
+        urls = dict[date]
+
+        urls_keys = list(urls.keys())
+        res = list()
+        for i in range(0, len(urls_keys)): 
+            for j in range (i+1, len(urls_keys)): 
+                if urls[urls_keys[i]] < urls[urls_keys[j]]:
+                    temp = urls_keys[i]
+                    urls_keys[i] = urls_keys[j]
+                    urls_keys[j] = temp
+            res.append(urls_keys[i])
+            count+=1
+            if (count == size):
+                quit = True
+                break
+        print(urls_keys)
+        print(res)
+        for i in range(0, len(res)):
+            ans.append({'url': res[i], 'count': urls[res[i]], date: date})
+        if quit == True:
+            break
+
+    json["queries"].append({"query": ans})
     return jsonify(json)
+
+def validate(date_text, format):
+    try:
+        datetime.strptime(date_text, format)
+        return date_text
+    except ValueError:
+        return False
 
 # LOADING LOGS
 load_logs("hn_logs.tsv")
-for key in dict:
-    for value in dict[key] :
-        if dict[key][value] > 1:
-            print(key, value, dict[key][value])
+
 if __name__ == '__main__':
     # LAUNCHING REST API
     app.run(host='0.0.0.0', port=5000, debug=False)
