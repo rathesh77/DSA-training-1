@@ -100,8 +100,9 @@ def popular(date_prefix=None):
     #            urls[i] = urls[j]
     #            urls[j] = temp
     #    out.append({'url': urls[i], 'count': ans[urls[i]]})
-    for url in merge_sort(urls, ans): 
-        out.append({'url': url, 'count': ans[url]})
+    urls = merge_sort(urls, ans)
+    for i in range(0, size): 
+        out.append({'url': urls[i], 'count': ans[urls[i]]})
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
@@ -130,7 +131,6 @@ def bruteForce(array, ans):
 def arrange(left, right, ans):
     left = list(left)
     right = list(right)
-    print('begin', len(left), len(right))
     if len(left) > len(right):
         temp = left
         left = right
@@ -149,7 +149,6 @@ def arrange(left, right, ans):
         right.insert(index, url)
         left.remove(url)
         index +=1
-    print('end')
     return right        
 
 
