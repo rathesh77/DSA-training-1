@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
 import re
+import numpy as np
 # Setting up Flask app
 app = Flask(__name__)
 dict = {}
@@ -52,6 +53,7 @@ def count(date_prefix=None):
 def popular(date_prefix=None):
     size = request.args.get('size', type=int, default=3)
     #TODO
+    start = time()
     parsedDate = None
     if (parsedDate := validate(date_prefix, '%Y-%m-%d')) == False:
         if (parsedDate := validate(date_prefix, '%Y-%m')) == False:
@@ -73,35 +75,83 @@ def popular(date_prefix=None):
 
     json = {"queries": []}
     ans = list()
-
-    print(keys)
-    quit = False
-    count = 0
+    
+    ans = {}
+    seen = {}
     for date in keys:
         urls = dict[date]
-
         urls_keys = list(urls.keys())
-        res = list()
         for i in range(0, len(urls_keys)): 
-            for j in range (i+1, len(urls_keys)): 
-                if urls[urls_keys[i]] < urls[urls_keys[j]]:
-                    temp = urls_keys[i]
-                    urls_keys[i] = urls_keys[j]
-                    urls_keys[j] = temp
-            res.append(urls_keys[i])
-            count+=1
-            if (count == size):
-                quit = True
-                break
-        print(urls_keys)
-        print(res)
-        for i in range(0, len(res)):
-            ans.append({'url': res[i], 'count': urls[res[i]], date: date})
-        if quit == True:
-            break
+            current_url = urls_keys[i]
+            if not current_url in seen:
+                seen[current_url] = True
+                ans[current_url] = urls[current_url]
+            else: 
+                ans[current_url] += urls[current_url]
+    out = []
 
-    json["queries"].append({"query": ans})
+    urls = list(ans.keys())
+    print(len(urls))
+
+    #for i in range(0, len(urls)):
+    #    for j in range(i+1, len(urls)): 
+    #        if ans[urls[i]] < ans[urls[j]]:
+    #            temp = urls[i]
+    #            urls[i] = urls[j]
+    #            urls[j] = temp
+    #    out.append({'url': urls[i], 'count': ans[urls[i]]})
+    for url in merge_sort(urls, ans): 
+        out.append({'url': url, 'count': ans[url]})
+    end = time()
+    print("time taken : " + str(round(end - start, 3)) + "s")
+
+    json["queries"].append({"query": out})
     return jsonify(json)
+
+def merge_sort(array, ans):
+    #TODO
+    if len(array) > 3:
+        a = np.array(array)
+        mid = int((len(array) -1) / 2)
+        left = a[0:mid]
+        right = a[mid:len(array)]
+        return arrange(merge_sort(left, ans), merge_sort(right, ans), ans)
+    else:
+        return bruteForce(array, ans)
+
+def bruteForce(array, ans):
+    for i in range(0, len(array)):
+        for j in range(i+1, len(array)):
+            if ans[array[i]] < ans[array[j]]:
+                temp = array[i]
+                array[i] = array[j]
+                array[j] = temp
+    return array
+def arrange(left, right, ans):
+    left = list(left)
+    right = list(right)
+    print('begin', len(left), len(right))
+    if len(left) > len(right):
+        temp = left
+        left = right
+        right = temp
+    index = 0
+    while len(left) > 0:
+        #print('left', left)
+        #print('right',right)
+        url = left[0]
+        if (index >= len(right) -1):
+            right.insert(index, url)
+            break        
+        #print(len(left), len(right), index, right[index])
+        while index <= len(right) -1 and ans[url] < ans[right[index]]:
+            index+=1
+        right.insert(index, url)
+        left.remove(url)
+        index +=1
+    print('end')
+    return right        
+
 
 def validate(date_text, format):
     try:
