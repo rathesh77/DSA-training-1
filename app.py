@@ -37,15 +37,33 @@ def add_to_logs(date, url):
             dict[date_str][url] += 1
 
 
+def parse_date(date):
+    
+    if (parse_date := validate(date, '%Y-%m-%d')) == False:
+        if (parse_date := validate(date, '%Y-%m')) == False:
+            if (parse_date := validate(date, '%Y') )== False: 
+                if (parse_date := validate(date, '%Y-%m-%d %H')) == False:
+                    if (parse_date := validate(date, '%Y-%m-%d %H:%M')) == False:
+                            if (parse_date := validate(date, '%Y-%m-%d %H:%M:%S')) == False:
+                                return None
+    return parse_date
+
+
 @app.route('/1/queries/count/<date_prefix>', methods=['GET'])
 def count(date_prefix=None):
     #TODO
+    date_prefix = parse_date(date_prefix)
+    if date_prefix == None:
+        return Response('error date is not stored', status=400)
+    
+    dates = list()
+    for date in dict:
+        if re.search("^"+date_prefix, date) != None:
+            dates.append(date)
     count = 0
-    if (date_prefix in dict) :
-        for url in dict[date_prefix]:
-            count += dict[date_prefix][url]
-            
-        #count = len(dict[date_prefix])    
+    for date in dates:
+        for url in dict[date]:
+                count += dict[date][url]
     return jsonify({"count": count})
 
 
@@ -54,26 +72,20 @@ def popular(date_prefix=None):
     size = request.args.get('size', type=int, default=3)
     #TODO
     start = time()
-    parsedDate = None
-    if (parsedDate := validate(date_prefix, '%Y-%m-%d')) == False:
-        if (parsedDate := validate(date_prefix, '%Y-%m')) == False:
-            if (parsedDate := validate(date_prefix, '%Y') )== False: 
-                if (parsedDate := validate(date_prefix, '%Y-%m-%d %H:%M:%S')) == False:
-                    return Response('invalid date format', status=400)
-
-    #if (not date_prefix in dict) :
-    #    return Response('error date is not stored', status=400)
+    parsed_date = parse_date(date_prefix)
+    if date_prefix == None:
+        return Response('error date is not stored', status=400)
+        
     keys = list()
     seen = {}
     for date in dict:
-        if re.search("^"+parsedDate, date) != None and not date in seen:
+        if re.search("^"+parsed_date, date) != None and not date in seen:
             keys.append(date)
             seen[date] = True
             
     if len(keys) == 0:
         return Response('error date is not stored', status=400)
 
-    json = {"queries": []}
     ans = list()
     
     ans = {}
@@ -106,8 +118,8 @@ def popular(date_prefix=None):
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
-    json["queries"].append({"query": out})
-    return jsonify(json)
+    return jsonify({"queries": out})
+
 
 def merge_sort(array, ans):
     #TODO
@@ -120,6 +132,7 @@ def merge_sort(array, ans):
     else:
         return bruteForce(array, ans)
 
+
 def bruteForce(array, ans):
     for i in range(0, len(array)):
         for j in range(i+1, len(array)):
@@ -128,6 +141,8 @@ def bruteForce(array, ans):
                 array[i] = array[j]
                 array[j] = temp
     return array
+
+
 def arrange(left, right, ans):
     left = list(left)
     right = list(right)
@@ -143,7 +158,6 @@ def arrange(left, right, ans):
         if (index >= len(right) -1):
             right.insert(index, url)
             break        
-        #print(len(left), len(right), index, right[index])
         while index <= len(right) -1 and ans[url] < ans[right[index]]:
             index+=1
         right.insert(index, url)
