@@ -114,7 +114,7 @@ def popular(date_prefix=None):
     #    out.append({'url': urls[i], 'count': ans[urls[i]]})
     urls = merge_sort(urls, ans)
     for i in range(0, size): 
-        out.append({'url': urls[i], 'count': ans[urls[i]]})
+        out.append({'query': urls[i], 'count': ans[urls[i]]})
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
