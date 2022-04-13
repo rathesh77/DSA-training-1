@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
 import re
-import numpy as np
 # Setting up Flask app
 app = Flask(__name__)
 dict = {}
@@ -86,17 +85,13 @@ def popular(date_prefix=None):
     if len(keys) == 0:
         return Response('error date is not stored', status=400)
 
-    ans = list()
-    
     ans = {}
-    seen = {}
     for date in keys:
         urls = dict[date]
         urls_keys = list(urls.keys())
         for i in range(0, len(urls_keys)): 
             current_url = urls_keys[i]
-            if not current_url in seen:
-                seen[current_url] = True
+            if not current_url in ans:
                 ans[current_url] = urls[current_url]
             else: 
                 ans[current_url] += urls[current_url]
