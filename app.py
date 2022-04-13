@@ -100,6 +100,14 @@ def popular(date_prefix=None):
     urls = list(ans.keys())
     print(len(urls))
 
+    for i in range(0, len(urls)):
+        el = {'query': urls[i], 'count': ans[urls[i]]}
+        if len(out) < 3:
+            out.append(el)
+            out = bruteForce(out)
+        else:
+            out = dichotomia(out, el)
+
     #for i in range(0, len(urls)):
     #    for j in range(i+1, len(urls)): 
     #        if ans[urls[i]] < ans[urls[j]]:
@@ -107,58 +115,50 @@ def popular(date_prefix=None):
     #            urls[i] = urls[j]
     #            urls[j] = temp
     #    out.append({'url': urls[i], 'count': ans[urls[i]]})
-    urls = merge_sort(urls, ans)
-    for i in range(0, size): 
-        out.append({'query': urls[i], 'count': ans[urls[i]]})
+
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
-    return jsonify({"queries": out})
+    return jsonify({"queries": slice(out, size)})
 
+def slice(array, end):
+    out = []
+    for i in range(0, end):
+        out.append(array[i])
+    return out
 
-def merge_sort(array, ans):
-    #TODO
-    if len(array) > 3:
-        a = np.array(array)
-        mid = int((len(array) -1) / 2)
-        left = a[0:mid]
-        right = a[mid:len(array)]
-        return arrange(merge_sort(left, ans), merge_sort(right, ans), ans)
+def dichotomia(array, el):
+
+    begin = 0
+    end = len(array) -1
+    count = el['count']
+    while(end - begin > 1):
+        mid = int((begin + end) / 2)
+        if (count == array[mid]['count']):
+            array.insert(mid, el)
+            return array
+        if (count >  array[mid]['count']): 
+            end = mid
+        else: 
+            begin = mid
+
+    if (count >= array[begin]['count']):
+        array.insert(begin, el)
+    elif count >= array[end]['count']:
+        array.insert(end, el)
     else:
-        return bruteForce(array, ans)
+        array.insert(end+1, el)
+    
+    return array
 
-
-def bruteForce(array, ans):
+def bruteForce(array):
     for i in range(0, len(array)):
         for j in range(i+1, len(array)):
-            if ans[array[i]] < ans[array[j]]:
+            if array[i]['count'] < array[j]['count']:
                 temp = array[i]
                 array[i] = array[j]
                 array[j] = temp
     return array
-
-
-def arrange(left, right, ans):
-    left = list(left)
-    right = list(right)
-    if len(left) > len(right):
-        temp = left
-        left = right
-        right = temp
-    index = 0
-    while len(left) > 0:
-        #print('left', left)
-        #print('right',right)
-        url = left[0]
-        if (index >= len(right) -1):
-            right.insert(index, url)
-            break        
-        while index <= len(right) -1 and ans[url] < ans[right[index]]:
-            index+=1
-        right.insert(index, url)
-        left.remove(url)
-        index +=1
-    return right        
 
 
 def validate(date_text, format):
