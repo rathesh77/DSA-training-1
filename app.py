@@ -72,7 +72,7 @@ def popular(date_prefix=None):
     #TODO
     start = time()
     parsed_date = parse_date(date_prefix)
-    if date_prefix == None:
+    if parsed_date == None:
         return Response('error date is not stored', status=400)
         
     keys = list()
