@@ -106,16 +106,7 @@ def popular(date_prefix=None):
             out.append(el)
             out = bruteForce(out)
         else:
-            out = dichotomia(out, el)
-
-    #for i in range(0, len(urls)):
-    #    for j in range(i+1, len(urls)): 
-    #        if ans[urls[i]] < ans[urls[j]]:
-    #            temp = urls[i]
-    #            urls[i] = urls[j]
-    #            urls[j] = temp
-    #    out.append({'url': urls[i], 'count': ans[urls[i]]})
-
+            out = dichotomy_search(out, el)
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
@@ -127,7 +118,7 @@ def slice(array, end):
         out.append(array[i])
     return out
 
-def dichotomia(array, el):
+def dichotomy_search(array, el):
 
     begin = 0
     end = len(array) -1
