@@ -4,6 +4,7 @@
 from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
+from Tree import *
 import re
 # Setting up Flask app
 app = Flask(__name__)
@@ -86,6 +87,7 @@ def popular(date_prefix=None):
         return Response('error date is not stored', status=400)
 
     ans = {}
+    t = Tree()
     for date in keys:
         urls = dict[date]
         urls_keys = list(urls.keys())
@@ -101,56 +103,16 @@ def popular(date_prefix=None):
     print(len(urls))
 
     for i in range(0, len(urls)):
-        el = {'query': urls[i], 'count': ans[urls[i]]}
-        if len(out) < 3:
-            out.append(el)
-            out = bruteForce(out)
-        else:
-            out = dichotomy_search(out, el)
+        url = urls[i]
+        count =  ans[urls[i]]
+        el = {'url': url, 'count': count}
+        t.insert(el)
+    
+    out = t.getMax(size)
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
-    return jsonify({"queries": slice(out, size)})
-
-def slice(array, end):
-    out = []
-    for i in range(0, end):
-        out.append(array[i])
-    return out
-
-def dichotomy_search(array, el):
-
-    begin = 0
-    end = len(array) -1
-    count = el['count']
-    while(end - begin > 1):
-        mid = int((begin + end) / 2)
-        if (count == array[mid]['count']):
-            array.insert(mid, el)
-            return array
-        if (count >  array[mid]['count']): 
-            end = mid
-        else: 
-            begin = mid
-
-    if (count >= array[begin]['count']):
-        array.insert(begin, el)
-    elif count >= array[end]['count']:
-        array.insert(end, el)
-    else:
-        array.insert(end+1, el)
-    
-    return array
-
-def bruteForce(array):
-    for i in range(0, len(array)):
-        for j in range(i+1, len(array)):
-            if array[i]['count'] < array[j]['count']:
-                temp = array[i]
-                array[i] = array[j]
-                array[j] = temp
-    return array
-
+    return jsonify({"queries": out})
 
 def validate(date_text, format):
     try:
