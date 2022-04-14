@@ -45,7 +45,6 @@ class Tree:
   def descendingSort(self, size):
     offset = 0
     ptr = self
-    parent = ptr
     if ptr.value == None:
       return ptr
     while True:
