@@ -42,7 +42,7 @@ class Tree:
         ptr = ptr.right
 
 
-  def getMax(self, size):
+  def descendingSort(self, size):
     offset = 0
     ptr = self
     parent = ptr
@@ -50,7 +50,6 @@ class Tree:
       return ptr
     while True:
       if ptr.right == None:
-        node = ptr
         break
       parent = ptr
       ptr = ptr.right
@@ -58,10 +57,10 @@ class Tree:
     out = []
     while ptr != None and offset < size:
       for url in ptr.urls:
-        out.append({'url': url, 'count': ptr.value})
+        out.append({'query': url, 'count': ptr.value})
       offset+= len(ptr.urls)
       if ptr.left != None:
-        left_array =  ptr.left.getMax(size - offset)
+        left_array =  ptr.left.descendingSort(size - offset)
         out += left_array
         offset += len(left_array)
       ptr = ptr.parent

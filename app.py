@@ -97,7 +97,6 @@ def popular(date_prefix=None):
                 ans[current_url] = urls[current_url]
             else: 
                 ans[current_url] += urls[current_url]
-    out = []
 
     urls = list(ans.keys())
     print(len(urls))
@@ -108,7 +107,7 @@ def popular(date_prefix=None):
         el = {'url': url, 'count': count}
         t.insert(el)
     
-    out = t.getMax(size)
+    out = t.descendingSort(size)
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
