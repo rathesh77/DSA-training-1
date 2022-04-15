@@ -57,7 +57,9 @@ class Tree:
     while ptr != None and offset < size:
       for url in ptr.urls:
         out.append({'query': url, 'count': ptr.value})
-      offset+= len(ptr.urls)
+        offset+=1
+        if offset >= size:
+          return out
       if ptr.left != None:
         left_array =  ptr.left.descendingSort(size - offset)
         out += left_array

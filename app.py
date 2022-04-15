@@ -76,38 +76,31 @@ def popular(date_prefix=None):
     if parsed_date == None:
         return Response('error date is not stored', status=400)
         
-    keys = list()
     seen = {}
     for date in dict:
         if re.search("^"+parsed_date, date) != None and not date in seen:
-            keys.append(date)
-            seen[date] = True
-            
-    if len(keys) == 0:
+            urls = dict[date].keys()
+            for url in urls:
+                if (not url in seen):
+                    seen[url] = dict[date][url]
+                else:
+                    seen[url] += dict[date][url]
+
+    urls = seen.keys()
+    if len(urls) == 0:
         return Response('error date is not stored', status=400)
-
-    ans = {}
-    t = Tree()
-    for date in keys:
-        urls = dict[date]
-        urls_keys = list(urls.keys())
-        for i in range(0, len(urls_keys)): 
-            current_url = urls_keys[i]
-            if not current_url in ans:
-                ans[current_url] = urls[current_url]
-            else: 
-                ans[current_url] += urls[current_url]
-
-    urls = list(ans.keys())
+        
     print(len(urls))
-
-    for i in range(0, len(urls)):
-        url = urls[i]
-        count =  ans[urls[i]]
+    tree = Tree()
+    for url in urls:
+        count =  seen[url]
         el = {'url': url, 'count': count}
-        t.insert(el)
+        tree.insert(el)
     
-    out = t.descendingSort(size)
+    max_elements = size
+    if max_elements > len(urls):
+        max_elements = len(urls)
+    out = tree.descendingSort(max_elements)
     end = time()
     print("time taken : " + str(round(end - start, 3)) + "s")
 
