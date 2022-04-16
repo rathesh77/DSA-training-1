@@ -12,34 +12,33 @@ class Tree:
         self.urls.append(url)
       pass
 
-  def leftRotate(self, parent):
+  def leftRotate(self):
     root = self
-
+    if root.parent != None:
+      parent = root.parent
     if parent.left.value ==  root.value:
       if root.right != None:
         parent.left = root.right
     elif parent.right.value == root.value:
       if root.right != None:
         parent.right = root.right
-    else:
-      return 'invalid parent'
-    if root.right != None and root.right.left != None:     
+    if root.right != None:     
       temp = root.right.left
       root.right.left = root
       root.right = temp
 
-  def rightRotate(self, parent):
+  def rightRotate(self):
     root = self
-
+    if root.parent != None:
+      parent = root.parent
     if parent.left.value ==  root.value:
       if root.left != None:
         parent.left = root.left
     elif parent.right.value == root.value:
       if root.left != None:
         parent.right = root.left
-    else:
-      return 'invalid parent'
-    if root.left != None and root.left.right != None:     
+
+    if root.left != None:     
       temp = root.left.right
       root.left.right = root
       root.left = temp
@@ -51,8 +50,6 @@ class Tree:
     count = element['count']
 
     url = element['url']
-    if count == 3100: 
-      print(url)    
     if ptr.value == None:
       ptr.urls.append(url)
       ptr.value = count
@@ -65,14 +62,43 @@ class Tree:
       elif count < ptr.value :
         if ptr.left == None:
           ptr.left = Tree(url, count)
+          ptr.left.parent = ptr
           break
         ptr = ptr.left
       else:
         if ptr.right == None:
           ptr.right = Tree(url, count)
+          ptr.right.parent = ptr       
           break     
         ptr = ptr.right
 
+  def isAvl(self, depth, child):
+    root = self
+    height = 0
+    if root.right != None and root.right.value == child.value:
+      if root.left != None:
+        height = root.left.getHeight()
+    else:
+      if root.right != None:
+        height = root.right.getHeight()
+    print(depth, height)
+
+    if abs(depth - height) > 2: 
+      return False
+    return True
+
+  def getHeight(self):
+    root = self
+    if root.left == None and root.right == None:
+      return 0
+    left = 0
+    right = 0
+    if root.left != None:
+      left = 1 + root.left.getHeight()
+    if root.right != None:
+      right = 1 + root.right.getHeight()
+
+    return max([left, right])
 
   def descendingSort(self, size):
     offset = 0
