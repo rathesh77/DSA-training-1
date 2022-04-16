@@ -12,6 +12,34 @@ class Tree:
         self.urls.append(url)
       pass
 
+  def leftRotate(self, parent):
+    root = self
+
+    if parent.left.value ==  root.value:
+      parent.left = root.right
+    elif parent.right.value == root.value:
+        parent.right = root.right
+    else:
+      return 'invalid parent'
+
+    temp = root.right.left
+    root.right.left = root
+    root.right = temp
+
+  def rightRotate(self, parent):
+    root = self
+
+    if parent.left.value ==  root.value:
+      parent.left = root.left
+    elif parent.right.value == root.value:
+        parent.right = root.left
+    else:
+      return 'invalid parent'
+
+    temp = root.left.right
+    root.left.right = root
+    root.left = temp
+    
   # element : {url: String, count: Integer}
   def insert(self, element):
     
