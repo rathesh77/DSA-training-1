@@ -16,29 +16,33 @@ class Tree:
     root = self
 
     if parent.left.value ==  root.value:
-      parent.left = root.right
+      if root.right != None:
+        parent.left = root.right
     elif parent.right.value == root.value:
+      if root.right != None:
         parent.right = root.right
     else:
       return 'invalid parent'
-
-    temp = root.right.left
-    root.right.left = root
-    root.right = temp
+    if root.right != None and root.right.left != None:     
+      temp = root.right.left
+      root.right.left = root
+      root.right = temp
 
   def rightRotate(self, parent):
     root = self
 
     if parent.left.value ==  root.value:
-      parent.left = root.left
+      if root.left != None:
+        parent.left = root.left
     elif parent.right.value == root.value:
+      if root.left != None:
         parent.right = root.left
     else:
       return 'invalid parent'
-
-    temp = root.left.right
-    root.left.right = root
-    root.left = temp
+    if root.left != None and root.left.right != None:     
+      temp = root.left.right
+      root.left.right = root
+      root.left = temp
     
   # element : {url: String, count: Integer}
   def insert(self, element):
