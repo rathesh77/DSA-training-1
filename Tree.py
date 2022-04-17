@@ -57,8 +57,6 @@ class Tree:
       else:
         root.parent.parent = None
 
-
-   
   # element : {url: String, count: Integer}
   def insert(self, element):
     
@@ -69,7 +67,7 @@ class Tree:
     if ptr.value == None:
       ptr.urls.append(url)
       ptr.value = count
-      return
+      return ptr
     
     while True:
       if count == ptr.value:
@@ -87,26 +85,37 @@ class Tree:
           ptr.right.parent = ptr       
           break     
         ptr = ptr.right
-    child = None
-    if ptr.right.value == count:
-      child = ptr.right
-    else:
-      child = ptr.left
-    if not ptr.isAvl(2, child):
-      print('arbre non-equilibré')
 
-  def isAvl(self, depth, child):
+    rotateLeft = False
+    if ptr.right != None and ptr.right.value == count:
+      rotateLeft = True
+
+    while ptr.parent != None:
+      ptr = ptr.parent
+
+      while ptr.isAvl() == False:
+        print('arbre non-equilibré', ptr.value)
+        if ptr.right != None:
+          ptr.leftRotate()
+        else:
+          print(ptr, ptr.left, ptr.right) 
+          ptr.rightRotate()
+          print(ptr, ptr.left, ptr.right) 
+    
+    while ptr.parent != None:
+      ptr = ptr.parent
+    return ptr
+    
+  def isAvl(self):
     root = self
-    height = 0
-    if root.right != None and root.right.value == child.value:
-      if root.left != None:
-        height = root.left.getHeight()
-    else:
-      if root.right != None:
-        height = root.right.getHeight()
-    print(depth, height)
+    leftHeight = 0
+    rightHeight = 0
+    if root.left != None:
+      leftHeight = 1 + root.left.getHeight()
+    if root.right != None:
+      rightHeight = 1 + root.right.getHeight()
 
-    if abs(depth - height) > 2: 
+    if abs(rightHeight - leftHeight) >= 2: 
       return False
     return True
 
