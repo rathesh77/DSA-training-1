@@ -12,37 +12,53 @@ class Tree:
         self.urls.append(url)
       pass
 
+  def __str__(self):
+      return str(self.value)
+
+ 
+
+  def addRightNode(self, node):
+    self.right = node
+    if node != None:
+      node.parent = self
+
+  def addLeftNode(self, node):
+    self.left = node
+    if node != None:
+      node.parent = self
+
   def leftRotate(self):
     root = self
-    if root.parent != None:
-      parent = root.parent
-    if parent.left.value ==  root.value:
-      if root.right != None:
-        parent.left = root.right
-    elif parent.right.value == root.value:
-      if root.right != None:
-        parent.right = root.right
-    if root.right != None:     
-      temp = root.right.left
-      root.right.left = root
-      root.right = temp
+    parent = root.parent
+    if root.right != None:
+      save = root.right.left
+      root.right.addLeftNode(root) 
+      root.addRightNode(save)
+      if parent != None:
+        if (parent.left.value == root.value):
+          parent.addLeftNode(root.parent)
+        else:
+          parent.addRightNode(root.parent)
+      else:
+        root.parent.parent = None
 
   def rightRotate(self):
     root = self
-    if root.parent != None:
-      parent = root.parent
-    if parent.left.value ==  root.value:
-      if root.left != None:
-        parent.left = root.left
-    elif parent.right.value == root.value:
-      if root.left != None:
-        parent.right = root.left
+    parent = root.parent
+    if root.left != None:
+      save = root.left.right
+      root.left.addRightNode(root) 
+      root.addLeftNode(save)
+      if parent != None:
+        if parent.left != None and parent.left.value == root.value:
+          parent.addLeftNode(root.parent)
+        else:
+          parent.addRightNode(root.parent)
+      else:
+        root.parent.parent = None
 
-    if root.left != None:     
-      temp = root.left.right
-      root.left.right = root
-      root.left = temp
-    
+
+   
   # element : {url: String, count: Integer}
   def insert(self, element):
     
@@ -71,6 +87,13 @@ class Tree:
           ptr.right.parent = ptr       
           break     
         ptr = ptr.right
+    child = None
+    if ptr.right.value == count:
+      child = ptr.right
+    else:
+      child = ptr.left
+    if not ptr.isAvl(2, child):
+      print('arbre non-equilibré')
 
   def isAvl(self, depth, child):
     root = self
