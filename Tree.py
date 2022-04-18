@@ -59,7 +59,7 @@ class Tree:
 
   # element : {url: String, count: Integer}
   def insert(self, element):
-    
+    #print('begin of insertion')
     ptr = self
     count = element['count']
 
@@ -86,22 +86,27 @@ class Tree:
           break     
         ptr = ptr.right
 
-    rotateLeft = False
-    if ptr.right != None and ptr.right.value == count:
-      rotateLeft = True
-
     while ptr.parent != None:
       ptr = ptr.parent
-
+      quit = False
       while ptr.isAvl() == False:
-        print('arbre non-equilibré', ptr.value)
-        if ptr.right != None:
-          ptr.leftRotate()
-        else:
-          print(ptr, ptr.left, ptr.right) 
-          ptr.rightRotate()
-          print(ptr, ptr.left, ptr.right) 
-    
+        quit = True
+        print('arbre non-equilibré', ptr.value, count, ptr.value)
+        if ptr.left != None and count < ptr.value:
+          if count > ptr.left.value:
+            ptr.left.leftRotate()
+            ptr.rightRotate()
+          elif count < ptr.left.value:
+            ptr.rightRotate()
+        if ptr.right != None and count > ptr.value:
+          if count > ptr.right.value:
+            ptr.leftRotate()            
+          elif count < ptr.right.value:
+            ptr.right.rightRotate()
+            ptr.leftRotate()
+      if quit == True:
+        break
+    print('quit')
     while ptr.parent != None:
       ptr = ptr.parent
     return ptr

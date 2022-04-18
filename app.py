@@ -95,7 +95,7 @@ def popular(date_prefix=None):
     for url in urls:
         count =  seen[url]
         el = {'url': url, 'count': count}
-        tree.insert(el)
+        tree = tree.insert(el)
     
     max_elements = size
     if max_elements > len(urls):
