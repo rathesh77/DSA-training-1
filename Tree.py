@@ -3,6 +3,7 @@ class Tree:
   # noeuds gauches => decroissants
   # noeuds droits => croissants
   def __init__(self, url = None, count = None):
+      self.bf = 0
       self.parent = None
       self.value = count
       self.left = None
@@ -34,13 +35,24 @@ class Tree:
       save = root.right.left
       root.right.addLeftNode(root) 
       root.addRightNode(save)
+      root.bf = root.getBalance()
+      root.parent.bf = root.parent.getBalance()      
       if parent != None:
-        if (parent.left.value == root.value):
+        if (parent.left != None and parent.left.value == root.value):
           parent.addLeftNode(root.parent)
         else:
           parent.addRightNode(root.parent)
       else:
         root.parent.parent = None
+
+  def getBalance(self):
+    lh = 0
+    rh = 0
+    if self.right != None:
+      rh = self.right.getHeight()
+    if self.left != None:
+      lh = self.left.getHeight()      
+    return rh - lh
 
   def rightRotate(self):
     root = self
@@ -49,6 +61,8 @@ class Tree:
       save = root.left.right
       root.left.addRightNode(root) 
       root.addLeftNode(save)
+      root.bf = root.getBalance()
+      root.parent.bf = root.parent.getBalance()
       if parent != None:
         if parent.left != None and parent.left.value == root.value:
           parent.addLeftNode(root.parent)
@@ -75,12 +89,14 @@ class Tree:
         break
       elif count < ptr.value :
         if ptr.left == None:
+          ptr.bf -= 1
           ptr.left = Tree(url, count)
           ptr.left.parent = ptr
           break
         ptr = ptr.left
       else:
         if ptr.right == None:
+          ptr.bf += 1
           ptr.right = Tree(url, count)
           ptr.right.parent = ptr       
           break     
@@ -88,10 +104,9 @@ class Tree:
 
     while ptr.parent != None:
       ptr = ptr.parent
-      quit = False
-      while ptr.isAvl() == False:
-        quit = True
-        print('arbre non-equilibré', ptr.value, count, ptr.value)
+      ptr.bf = ptr.getBalance()
+      if abs(ptr.bf) == 2:
+        #print('arbre non-equilibré', ptr.value, count, ptr.value)
         if ptr.left != None and count < ptr.value:
           if count > ptr.left.value:
             ptr.left.leftRotate()
@@ -104,25 +119,13 @@ class Tree:
           elif count < ptr.right.value:
             ptr.right.rightRotate()
             ptr.leftRotate()
-      if quit == True:
         break
-    print('quit')
+      elif ptr.bf == 0:
+        break
+
     while ptr.parent != None:
       ptr = ptr.parent
     return ptr
-    
-  def isAvl(self):
-    root = self
-    leftHeight = 0
-    rightHeight = 0
-    if root.left != None:
-      leftHeight = 1 + root.left.getHeight()
-    if root.right != None:
-      rightHeight = 1 + root.right.getHeight()
-
-    if abs(rightHeight - leftHeight) >= 2: 
-      return False
-    return True
 
   def getHeight(self):
     root = self
@@ -140,16 +143,17 @@ class Tree:
   def descendingSort(self, size):
     offset = 0
     ptr = self
-    if ptr.value == None:
+    value = ptr.value
+    if value == None:
       return ptr
     while True:
       if ptr.right == None:
         break
-      parent = ptr
       ptr = ptr.right
-      ptr.parent = parent
     out = []
     while ptr != None and offset < size:
+      if (ptr.left and ptr.left.value == value) or (ptr.right and ptr.right.value == value):
+        break
       for url in ptr.urls:
         out.append({'query': url, 'count': ptr.value})
         offset+=1
