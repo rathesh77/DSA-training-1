@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 flask = "*"
 requests = "*"
-numpy = "*"
 
 [dev-packages]
 
