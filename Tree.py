@@ -3,7 +3,7 @@ class Tree:
   # noeuds gauches => decroissants
   # noeuds droits => croissants
   def __init__(self, url = None, count = None):
-      self.bf = 0
+      self.height = 0
       self.parent = None
       self.value = count
       self.left = None
@@ -35,24 +35,17 @@ class Tree:
       save = root.right.left
       root.right.addLeftNode(root) 
       root.addRightNode(save)
-      root.bf = root.getBalance()
-      root.parent.bf = root.parent.getBalance()      
+      root.height = root.getHeight()
+      root.parent.height = root.parent.getHeight()    
       if parent != None:
         if (parent.left != None and parent.left.value == root.value):
           parent.addLeftNode(root.parent)
         else:
           parent.addRightNode(root.parent)
+        parent.height = parent.getHeight()
       else:
         root.parent.parent = None
 
-  def getBalance(self):
-    lh = 0
-    rh = 0
-    if self.right != None:
-      rh = self.right.getHeight()
-    if self.left != None:
-      lh = self.left.getHeight()      
-    return rh - lh
 
   def rightRotate(self):
     root = self
@@ -61,19 +54,21 @@ class Tree:
       save = root.left.right
       root.left.addRightNode(root) 
       root.addLeftNode(save)
-      root.bf = root.getBalance()
-      root.parent.bf = root.parent.getBalance()
+      root.height = root.getHeight()
+      root.parent.height = root.parent.getHeight()
       if parent != None:
         if parent.left != None and parent.left.value == root.value:
           parent.addLeftNode(root.parent)
         else:
           parent.addRightNode(root.parent)
+        parent.height = parent.getHeight()
       else:
         root.parent.parent = None
 
   # element : {url: String, count: Integer}
   def insert(self, element):
     #print('begin of insertion')
+    temp = self
     ptr = self
     count = element['count']
 
@@ -89,23 +84,23 @@ class Tree:
         break
       elif count < ptr.value :
         if ptr.left == None:
-          ptr.bf -= 1
           ptr.left = Tree(url, count)
           ptr.left.parent = ptr
           break
         ptr = ptr.left
       else:
         if ptr.right == None:
-          ptr.bf += 1
           ptr.right = Tree(url, count)
           ptr.right.parent = ptr       
           break     
         ptr = ptr.right
 
+    ptr.height = ptr.getHeight()
     while ptr.parent != None:
       ptr = ptr.parent
-      ptr.bf = ptr.getBalance()
-      if abs(ptr.bf) == 2:
+      ptr.height = ptr.getHeight()
+      bf = ptr.getBf()
+      if abs(bf) == 2:
         #print('arbre non-equilibré', ptr.value, count, ptr.value)
         if ptr.left != None and count < ptr.value:
           if count > ptr.left.value:
@@ -120,12 +115,12 @@ class Tree:
             ptr.right.rightRotate()
             ptr.leftRotate()
         break
-      elif ptr.bf == 0:
+      elif bf == 0:
         break
 
-    while ptr.parent != None:
-      ptr = ptr.parent
-    return ptr
+    while temp.parent != None:
+      temp = temp.parent
+    return temp
 
   def getHeight(self):
     root = self
@@ -134,12 +129,22 @@ class Tree:
     left = 0
     right = 0
     if root.left != None:
-      left = 1 + root.left.getHeight()
+      left = 1 + root.left.height
     if root.right != None:
-      right = 1 + root.right.getHeight()
+      right = 1 + root.right.height
 
     return max([left, right])
 
+  def getBf(self):
+    root = self
+    left = 0
+    right = 0
+    if root.left:
+      left = 1 + root.left.height
+    if root.right:
+      right = 1 +root.right.height
+
+    return abs(right - left)
   def descendingSort(self, size):
     offset = 0
     ptr = self
