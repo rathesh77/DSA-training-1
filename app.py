@@ -79,11 +79,9 @@ def popular(date_prefix=None):
         return Response('error date is not stored', status=400)
         
     out = []
-    for date in trees:
-        if re.search("^"+parsed_date+ "$", date) != None:
-            out = trees[date].descendingSort(size)
-            break
-    
+    if (trees[parsed_date] != None):
+        out = trees[parsed_date].descendingSort(size)
+            
     print("time taken : " + str(round(time() - start, 3)) + "s")
     return jsonify({"queries": out})
 
@@ -97,27 +95,19 @@ def validate(date_text, format):
 # LOADING LOGS
 load_logs("hn_logs.tsv")
 for date in dict:
+    f1 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')
+    f2 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')
+    f3 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
+    f4 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')
+    f5 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')
     if not date in trees:
-        #print(date)
         trees[date] = Tree()
-        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')] = Tree()
-        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')] = Tree()
-        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')] = Tree()
-        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')] = Tree()
-        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')] = Tree()
+
+
     for url in dict[date]:
         el = {'url': url, 'count': dict[date][url]}
         trees[date] = trees[date].insert(el)
-        f1 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')
-        f2 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')
-        f3 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
-        f4 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')
-        f5 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')
-        trees[f1]  = trees[f1] .insert(el)
-        trees[f2] = trees[f2].insert(el)
-        trees[f3] = trees[f3].insert(el)
-        trees[f4] = trees[f4].insert(el)
-        trees[f5] = trees[f5].insert(el)
+
 
 if __name__ == '__main__':
     # LAUNCHING REST API

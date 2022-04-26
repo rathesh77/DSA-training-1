@@ -12,10 +12,6 @@ class Tree:
       if url != None:
         self.urls.append(url)
       pass
-
-  def __str__(self):
-      return str(self.value)
-
  
 
   def addRightNode(self, node):
