@@ -9,6 +9,8 @@ import re
 # Setting up Flask app
 app = Flask(__name__)
 dict = {}
+trees = {}
+
 # Utility functions
 def load_logs(filename):
     print("loading, please wait...")
@@ -76,34 +78,13 @@ def popular(date_prefix=None):
     if parsed_date == None:
         return Response('error date is not stored', status=400)
         
-    seen = {}
-    for date in dict:
-        if re.search("^"+parsed_date, date) != None and not date in seen:
-            urls = dict[date].keys()
-            for url in urls:
-                if (not url in seen):
-                    seen[url] = dict[date][url]
-                else:
-                    seen[url] += dict[date][url]
-
-    urls = seen.keys()
-    if len(urls) == 0:
-        return Response('error date is not stored', status=400)
-        
-    print(len(urls))
-    tree = Tree()
-    for url in urls:
-        count =  seen[url]
-        el = {'url': url, 'count': count}
-        tree = tree.insert(el)
+    out = []
+    for date in trees:
+        if re.search("^"+parsed_date+ "$", date) != None:
+            out = trees[date].descendingSort(size)
+            break
     
-    max_elements = size
-    if max_elements > len(urls):
-        max_elements = len(urls)
-    out = tree.descendingSort(max_elements)
-    end = time()
-    print("time taken : " + str(round(end - start, 3)) + "s")
-
+    print("time taken : " + str(round(time() - start, 3)) + "s")
     return jsonify({"queries": out})
 
 def validate(date_text, format):
@@ -115,6 +96,28 @@ def validate(date_text, format):
 
 # LOADING LOGS
 load_logs("hn_logs.tsv")
+for date in dict:
+    if not date in trees:
+        #print(date)
+        trees[date] = Tree()
+        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')] = Tree()
+        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')] = Tree()
+        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')] = Tree()
+        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')] = Tree()
+        trees[datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')] = Tree()
+    for url in dict[date]:
+        el = {'url': url, 'count': dict[date][url]}
+        trees[date] = trees[date].insert(el)
+        f1 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')
+        f2 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')
+        f3 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
+        f4 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')
+        f5 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')
+        trees[f1]  = trees[f1] .insert(el)
+        trees[f2] = trees[f2].insert(el)
+        trees[f3] = trees[f3].insert(el)
+        trees[f4] = trees[f4].insert(el)
+        trees[f5] = trees[f5].insert(el)
 
 if __name__ == '__main__':
     # LAUNCHING REST API
