@@ -5,12 +5,10 @@ from flask import Flask, request, jsonify, Response
 from datetime import datetime
 from time import time
 from Tree import *
-import re
-# Setting up Flask app
+
 app = Flask(__name__)
 dict = {}
 trees = {}
-# Utility functions
 def load_logs(filename):
     print("loading, please wait...")
     start = time()
@@ -23,7 +21,7 @@ def load_logs(filename):
     end = time()
     print("loaded in : " + str(round(end - start, 3)) + "s")
 
-def update_branch(trees, date, url):
+def update_dict_dates(trees, date, url):
     if (not date in trees):
         trees[date] = {}
     if not url in trees[date]:
@@ -50,12 +48,12 @@ def add_to_logs(date, url):
     if not date_str in dict:
         dict[date_str] = {url : {'count': 1}}
     else:
-        update_branch(dict, date_str, url)
-    update_branch(dict, f1, url)
-    update_branch(dict, f2, url)
-    update_branch(dict, f3, url)
-    update_branch(dict, f4, url)
-    update_branch(dict, f5, url)
+        update_dict_dates(dict, date_str, url)
+    update_dict_dates(dict, f1, url)
+    update_dict_dates(dict, f2, url)
+    update_dict_dates(dict, f3, url)
+    update_dict_dates(dict, f4, url)
+    update_dict_dates(dict, f5, url)
 
 def parse_date(date):
     
@@ -76,14 +74,10 @@ def count(date_prefix=None):
     if date_prefix == None:
         return Response('error date is not stored', status=400)
     
-    dates = list()
-    for date in dict:
-        if re.search("^"+date_prefix, date) != None:
-            dates.append(date)
     count = 0
-    for date in dates:
-        for url in dict[date]:
-                count += dict[date][url]
+    for url in dict[date_prefix]:
+        count += dict[date_prefix][url]['count']
+
     return jsonify({"count": count})
 
 
@@ -120,6 +114,7 @@ for date in dict:
     for url in dict[date]:
         el = {'url': url, 'count': dict[date][url]['count']}
         trees[date] = trees[date].insert(el)
+#del dict
 if __name__ == '__main__':
     # LAUNCHING REST API
     app.run(host='0.0.0.0', port=5000, debug=False)
