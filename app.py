@@ -10,7 +10,6 @@ import re
 app = Flask(__name__)
 dict = {}
 trees = {}
-
 # Utility functions
 def load_logs(filename):
     print("loading, please wait...")
@@ -24,20 +23,39 @@ def load_logs(filename):
     end = time()
     print("loaded in : " + str(round(end - start, 3)) + "s")
 
+def update_branch(trees, date, url):
+    if (not date in trees):
+        trees[date] = {}
+    if not url in trees[date]:
+        trees[date][url] = {'count': 1} 
+    else:
+        trees[date][url]['count'] += 1 
+
+def slice_date(date, end):
+    str = ''
+    for i in range(0, end+1):
+        str += date[i]
+    return str
 
 def add_to_logs(date, url):
     #TODO
     date_str = date.strftime("%Y-%m-%d %H:%M:%S")
 
-    if (not date_str in dict) :
-        dict[date_str] = {}
-        dict[date_str][url] = 1
-    else :
-        if (not url in dict[date_str]) :
-            dict[date_str][url] = 1
-        else :
-            dict[date_str][url] += 1
-
+    f1 = slice_date(date_str, 15)
+    f2 = slice_date(date_str, 12)
+    f3 = slice_date(date_str, 9)
+    f4 = slice_date(date_str, 6)
+    f5 = slice_date(date_str, 3)
+    
+    if not date_str in dict:
+        dict[date_str] = {url : {'count': 1}}
+    else:
+        update_branch(dict, date_str, url)
+    update_branch(dict, f1, url)
+    update_branch(dict, f2, url)
+    update_branch(dict, f3, url)
+    update_branch(dict, f4, url)
+    update_branch(dict, f5, url)
 
 def parse_date(date):
     
@@ -77,12 +95,14 @@ def popular(date_prefix=None):
     parsed_date = parse_date(date_prefix)
     if parsed_date == None:
         return Response('error date is not stored', status=400)
-        
+
+
     out = []
-    if (trees[parsed_date] != None):
-        out = trees[parsed_date].descendingSort(size)
-            
-    print("time taken : " + str(round(time() - start, 3)) + "s")
+
+    out = trees[parsed_date].descendingSort(size)
+    end = time()
+    print("time taken : " + str(round(end - start, 3)) + "s")
+
     return jsonify({"queries": out})
 
 def validate(date_text, format):
@@ -94,21 +114,12 @@ def validate(date_text, format):
 
 # LOADING LOGS
 load_logs("hn_logs.tsv")
+
 for date in dict:
-    f1 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M')
-    f2 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H')
-    f3 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
-    f4 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m')
-    f5 = datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%Y')
-    if not date in trees:
-        trees[date] = Tree()
-
-
+    trees[date] = Tree()
     for url in dict[date]:
-        el = {'url': url, 'count': dict[date][url]}
+        el = {'url': url, 'count': dict[date][url]['count']}
         trees[date] = trees[date].insert(el)
-
-
 if __name__ == '__main__':
     # LAUNCHING REST API
     app.run(host='0.0.0.0', port=5000, debug=False)
